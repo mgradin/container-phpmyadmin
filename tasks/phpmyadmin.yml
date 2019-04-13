@@ -1,0 +1,17 @@
+---
+- name: Start phpmyadmin container
+  docker_container:
+    name: phpmyadmin
+    image: phpmyadmin/phpmyadmin:latest
+    pull: yes
+    state: started
+    labels:
+      traefik.backend=phpmyadmin
+      "traefik.frontend.rule=Host:{{ VAR_PHPMYADMIN_URL }}"
+      traefik.port=80
+      traefik.enable=true
+    env:
+       PMA_ABSOLUTE_URI: "https://{{ VAR_PHPMYADMIN_URL }}"
+    links:
+     - mariadb:db
+    restart_policy: unless-stopped
