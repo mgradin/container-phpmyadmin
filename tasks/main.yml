@@ -1,4 +1,3 @@
 ---
 # tasks file for container-phpmyadmin
 - import_tasks: phpmyadmin.yml
-  become: true

@@ -1,17 +1,27 @@
 ---
+- name: Pull latest phpmyadmin image
+  containers.podman.podman_image:
+    name: phpmyadmin:latest
+
 - name: Start phpmyadmin container
-  docker_container:
+  containers.podman.podman_container:
     name: phpmyadmin
-    image: phpmyadmin/phpmyadmin:latest
-    pull: yes
+    image: phpmyadmin:latest
     state: started
-    labels:
-      traefik.backend=phpmyadmin
-      "traefik.frontend.rule=Host:{{ VAR_PHPMYADMIN_URL }}"
-      traefik.port=80
-      traefik.enable=true
     env:
-       PMA_ABSOLUTE_URI: "https://{{ VAR_PHPMYADMIN_URL }}"
-    links:
-     - mariadb:db
-    restart_policy: unless-stopped
+       PMA_HOST: "{{ VAR_PHPMYADMIN_URL }}"
+    ports:
+      - 8082:80
+  register: container
+
+- name: Create new systemd file
+  shell: podman generate systemd --name traefik > /etc/systemd/system/container-traefik.service
+  when: container.changed
+
+- name: restart container with systemd
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: container-traefik
+  when: container.changed
+
