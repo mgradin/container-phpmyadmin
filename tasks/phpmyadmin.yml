@@ -15,13 +15,14 @@
   register: container
 
 - name: Create new systemd file
-  shell: podman generate systemd --name traefik > /etc/systemd/system/container-traefik.service
+  shell: podman generate systemd --name phpmyadmin > ~/.config/systemd/user/container-phpmyadmin.service
   when: container.changed
 
 - name: restart container with systemd
   systemd:
     state: restarted
     daemon_reload: yes
-    name: container-traefik
+    name: container-phpmyadmin
+    user: yes
   when: container.changed
 
